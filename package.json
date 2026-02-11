@@ -1,15 +1,15 @@
 {
   "dependencies": {
     "dotenv": "^17.2.4",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.2.1"
   },
   "name": "sara7aapp",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
-    "start":"node --watch src/main.js"
+    "start": "node --watch src/main.js"
   },
   "repository": {
     "type": "git",
