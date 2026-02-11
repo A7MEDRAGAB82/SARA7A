@@ -2,5 +2,25 @@
   "dependencies": {
     "dotenv": "^17.2.4",
     "express": "^5.2.1"
-  }
+  },
+  "name": "sara7aapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "start":"node --watch src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/A7MEDRAGAB82/SARA7A.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/A7MEDRAGAB82/SARA7A/issues"
+  },
+  "homepage": "https://github.com/A7MEDRAGAB82/SARA7A#readme"
 }

@@ -1,0 +1,9 @@
+import dotenv from 'dotenv';
+
+dotenv.config({path: "./config/.env"})
+
+const mongoURL = process.env.DATABASE_URI
+const mood = process.env.MOOD
+const port = process.env.PORT
+
+export const env = {port , mongoURL , mood}
