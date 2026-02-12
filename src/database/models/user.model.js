@@ -36,3 +36,14 @@ const userSchema = new mongoose.Schema({
     default: ProviderEnums.System,
   },
 });
+
+
+userSchema.virtual('userName').set(function (value){
+    let [firstName , lastName] = value.split(' ')
+    this.firstName = firstName
+    this.lastName = lastName
+}).get(function () {
+    return `${this.firstName} ${this.lastName}`
+})
+
+export const userModel = mongoose.model("User", userSchema)
