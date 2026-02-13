@@ -4,6 +4,7 @@ import { SuccessResponse } from "../../common/utils/response/success.responce.js
 const router = Router();
 
 router.post("/sign-up", async (req, res) => {
+  
   let addedUser = await signUp(req.body);
   return SuccessResponse({
     res,
