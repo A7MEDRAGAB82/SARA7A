@@ -12,7 +12,8 @@ export const signUp = async (data) => {
   if (existUser) {
     return ConflictException("email already exist");
   }
-  let addedUser = await userModel.insertOne({ userName, email, password });
+  let addedUser = await userModel.create({ userName, email, password });
+
   return addedUser;
 };
 

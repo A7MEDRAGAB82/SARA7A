@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
-import { GenderEnums, ProviderEnums } from "../../common/index.js";
-import {env} from "../../../config/index.js"
-import bcrypt from "bcrypt"
+import { GenderEnums, ProviderEnums , generateHash , compareHash } from "../../common/index.js";
+
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -60,11 +59,11 @@ userSchema.pre('save', async function () {
     
     if (!this.isModified('password')) return; 
 
-    this.password = await bcrypt.hash(this.password, parseInt(env.saltRounds) || 10); 
+    this.password = await generateHash(this.password) 
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
+    return await compareHash(enteredPassword,this.password)
 };
 
 export const userModel = mongoose.model("User", userSchema)
