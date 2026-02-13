@@ -18,9 +18,12 @@ export const signUp = async (data) => {
 
 export const login = async (data) => {
   let { email, password } = data;
-  let existUser = await findOne({model:userModel , filter:{email , password , provider:ProviderEnums.System} , select:"-password -_id"})
+  let existUser = await findOne({model:userModel , filter:{email , provider:ProviderEnums.System}})
   if (existUser) {
-    return existUser;
+    const isMatched = await existUser.comparePassword(password)
+    if(isMatched){
+      return existUser
+    }
   }
   return NotFoundException({ message: "invalid email or password" });
 };
