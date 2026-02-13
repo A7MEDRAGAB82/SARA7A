@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "../../common/utils/response/error.responce.js";
 import { userModel } from "../../database/index.js";
-import { findOne } from "../../database/database.service.js";
+import { findOne, insertOne } from "../../database/database.service.js";
 
 export const signUp = async (data) => {
   let { userName, email, password } = data;
@@ -12,8 +12,15 @@ export const signUp = async (data) => {
   if (existUser) {
     return ConflictException("email already exist");
   }
-  let addedUser = await userModel.create({ userName, email, password });
-
+  let addedUser = await insertOne({
+      model: userModel,
+      data: { 
+          userName, 
+          email, 
+          password, 
+          provider: ProviderEnums.System 
+      }
+  });
   return addedUser;
 };
 
@@ -28,3 +35,5 @@ export const login = async (data) => {
   }
   return NotFoundException({ message: "invalid email or password" });
 };
+
+
