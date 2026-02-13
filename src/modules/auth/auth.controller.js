@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signUp  , login} from "./auth.service.js";
+import { signUp  , login , getUserById} from "./auth.service.js";
 import { SuccessResponse } from "../../common/utils/response/success.responce.js";
 const router = Router();
 
@@ -23,5 +23,14 @@ router.post("/login", async (req, res) => {
     data: loginUser,
   });
 });
+
+router.get("/get-user-by-id", async (req,res)=>{
+  let userData = await getUserById(req.headers)
+  return SuccessResponse({ 
+            res, 
+            message: "User profile fetched successfully", 
+            data: userData 
+        });
+})
 
 export default router;
