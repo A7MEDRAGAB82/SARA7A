@@ -105,8 +105,8 @@ This project is **ongoing**. Implemented features are production-ready within th
    DATABASE_URI=
    MOOD=
    SALT=
-   JWT_SECRET_KEY=your-secret-key
-   ENC_KEY=your-encryption-key
+   JWT_SECRET_KEY=your secret key
+   ENC_KEY=your encryption key
    ```
 
    | Variable        | Description                                |
