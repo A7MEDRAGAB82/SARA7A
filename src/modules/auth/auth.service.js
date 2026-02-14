@@ -55,3 +55,7 @@ export const getUserById = async (headers) =>{
    }
    return userData
 }
+
+export const updateLoginData = async (id , data) =>{
+  
+}
