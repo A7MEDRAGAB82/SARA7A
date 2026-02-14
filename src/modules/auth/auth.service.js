@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken"
 import { env } from "../../../config/env.service.js";
 
 export const signUp = async (data) => {
-  let { userName, email, password } = data;
+  let { userName, email, password  , phone } = data;
   let existUser = await findOne({model:userModel ,filter:{email}})
   if (existUser) {
     return ConflictException("email already exist");
@@ -20,7 +20,8 @@ export const signUp = async (data) => {
       data: { 
           userName, 
           email, 
-          password, 
+          password,
+          phone, 
           provider: ProviderEnums.System 
       }
   });

@@ -4,6 +4,7 @@ import {
   ProviderEnums,
   generateHash,
   compareHash,
+  encrypt
 } from "../../common/index.js";
 
 const userSchema = new mongoose.Schema(
@@ -75,9 +76,15 @@ userSchema
   });
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+    
+    if (this.isModified("password")) {
+        this.password = await generateHash(this.password);
+    }
 
-  this.password = await generateHash(this.password);
+    if (this.isModified("phone")) {
+        this.phone = encrypt(this.phone);
+    }
+    
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
