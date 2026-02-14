@@ -101,10 +101,10 @@ This project is **ongoing**. Implemented features are production-ready within th
    Create a `.env` file inside the `config` folder (`config/.env`) with the following variables:
 
    ```env
-   PORT=3000
-   DATABASE_URI=mongodb://localhost:27017/sara7a
-   MOOD=dev
-   SALT=10
+   PORT=
+   DATABASE_URI=
+   MOOD=
+   SALT=
    JWT_SECRET_KEY=your-secret-key
    ENC_KEY=your-encryption-key
    ```
