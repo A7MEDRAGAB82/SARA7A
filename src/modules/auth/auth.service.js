@@ -5,15 +5,15 @@ import {
   UnauthorizedException,
 } from "../../common/utils/response/index.js";
 import { userModel } from "../../database/index.js";
-import { findOne, insertOne ,findById} from "../../database/database.service.js";
+import { findOne, insertOne ,findById, findOneAndUpdate} from "../../database/database.service.js";
 import jwt from "jsonwebtoken"
 import { env } from "../../../config/env.service.js";
 
 export const signUp = async (data) => {
-  let { userName, email, password  , phone } = data;
+  let { userName, email, password  , phone ,gender , DOB } = data;
   let existUser = await findOne({model:userModel ,filter:{email}})
   if (existUser) {
-    return ConflictException("email already exist");
+     ConflictException("email already exist");
   }
   let addedUser = await insertOne({
       model: userModel,
@@ -21,7 +21,9 @@ export const signUp = async (data) => {
           userName, 
           email, 
           password,
-          phone, 
+          phone,
+          gender,
+          DOB, 
           provider: ProviderEnums.System 
       }
   });
@@ -38,7 +40,7 @@ export const login = async (data) => {
       return {user:existUser,token}
     }
   }
-  return NotFoundException({ message: "invalid email or password" });
+   NotFoundException({ message: "invalid email or password" });
 };
 
 export const getUserById = async (userId) =>{
@@ -46,11 +48,27 @@ export const getUserById = async (userId) =>{
 
    const  userData = await findById({model:userModel , id:userId}) 
    if(!userData){
-    return NotFoundException("user not found")
+     NotFoundException("user not found")
    }
    return userData
 }
 
 export const updateLoginData = async (id , data) =>{
+  let {userName , phone, gender, DOB} = data
+  const existUser = await findById({model:userModel , id})
+  if(!existUser){
+     NotFoundException("user not found")
+  }
+   
+   
+if (userName) existUser.userName = userName;
+if (phone) existUser.phone = phone;
+if (gender) existUser.gender = gender;
+if (DOB) existUser.DOB = DOB;
+
+  await existUser.save()
+
+
+return existUser
   
 }
