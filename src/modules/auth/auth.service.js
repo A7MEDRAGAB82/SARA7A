@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from "../../common/utils/response/index.js";
 import { userModel } from "../../database/index.js";
-import { findOne, insertOne ,findById, findOneAndUpdate} from "../../database/database.service.js";
+import { findOne, insertOne ,findById, findByIdAndDelete} from "../../database/database.service.js";
 import jwt from "jsonwebtoken"
 import { env } from "../../../config/env.service.js";
 
@@ -71,4 +71,12 @@ if (DOB) existUser.DOB = DOB;
 
 return existUser
   
+}
+
+export const deleteUser = async (id)=>{
+    const deletedUser = await findByIdAndDelete({model:userModel , id})
+    if(!deletedUser){
+      NotFoundException({message:"user not found"})
+    }
+    return deletedUser
 }

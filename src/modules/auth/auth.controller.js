@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signUp  , login , getUserById , updateLoginData} from "./auth.service.js";
+import { signUp  , login , getUserById , updateLoginData , deleteUser} from "./auth.service.js";
 import { SuccessResponse } from "../../common/utils/response/index.js";
 import { verifyToken , asyncWrapper} from "../../middlewares/index.js"
 
@@ -42,6 +42,14 @@ router.patch("/update-login-data" , verifyToken , asyncWrapper(async (req ,res)=
     res,
     message:"user data updated successfully",
     data:updateUser
+  })
+}))
+
+router.delete("/delete-user", verifyToken , asyncWrapper(async (req,res)=>{
+  let deletedUser = await deleteUser(req.user.id)
+  return SuccessResponse({
+    res,
+    message:"user deleted successfully",
   })
 }))
 
