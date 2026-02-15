@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { signUp  , login , getUserById} from "./auth.service.js";
-import { SuccessResponse } from "../../common/utils/response/success.responce.js";
+import { SuccessResponse } from "../../common/utils/response/index.js";
+import { verifyToken} from "../../middlewares/index.js"
+
 const router = Router();
 
 router.post("/sign-up", async (req, res) => {
@@ -24,8 +26,8 @@ router.post("/login", async (req, res) => {
   });
 });
 
-router.get("/get-user-by-id", async (req,res)=>{
-  let userData = await getUserById(req.headers)
+router.get("/get-user-by-id", verifyToken  , async (req,res)=>{
+  let userData = await getUserById(req.user.id)
   return SuccessResponse({ 
             res, 
             message: "User profile fetched successfully", 

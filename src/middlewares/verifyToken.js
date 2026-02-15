@@ -1,23 +1,24 @@
 import jwt from 'jsonwebtoken';
+import { env } from '../../config/index.js';
+import { UnauthorizedException } from '../common/utils/response/index.js';
 
-const verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
     const authHeader = req.headers.token || req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({ message: "You are not authenticated!" });
+        return UnauthorizedException({message:"You are not authenticated!"})
     }
 
     const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, env.JWT_SECRET_KEY);
         
         req.user = decoded; 
         
         next(); 
     } catch (err) {
-        return res.status(403).json({ message: "Token is not valid or expired!" });
+        return UnauthorizedException({message:"Token is not valid or expired!"})
     }
 };
 
-export default verifyToken;
