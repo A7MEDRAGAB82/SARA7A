@@ -5,9 +5,12 @@ import {
   UnauthorizedException,
 } from "../../common/utils/response/index.js";
 import { userModel } from "../../database/index.js";
-import { findOne, insertOne ,findById, findByIdAndDelete} from "../../database/database.service.js";
+import { findOne, insertOne ,findById, findByIdAndDelete} from "../../database/index.js";
 import jwt from "jsonwebtoken"
-import { env } from "../../../config/env.service.js";
+import { env } from "../../../config/index.js";
+import crypto from "crypto"
+import {sendEmail  , generateHash} from "../../common/index.js"
+
 
 export const signUp = async (data) => {
   let { userName, email, password  , phone ,gender , DOB } = data;
@@ -80,3 +83,41 @@ export const deleteUser = async (id)=>{
     }
     return deletedUser
 }
+
+export const updatePassword = async (id , oldPassword , newPassword) =>{
+  const existUser = await findById({model:userModel , id})
+  if(!existUser){
+      NotFoundException({message:"user not found"})
+  }
+
+  const isMatched = await existUser.comparePassword(oldPassword)
+  if(!isMatched){
+    UnauthorizedException({message:"old password is incorrect"})
+  }
+  existUser.password = newPassword
+  await existUser.save()
+  return existUser
+}
+
+export const forgotPassword = async (email) => {
+    const user = await findOne({ model: userModel, filter: { email } });
+    if (!user) {
+        NotFoundException({ message: "User not found with this email" });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    user.otp = await generateHash(otp);
+    user.otpExpires = Date.now() + 10 * 60 * 1000; 
+
+    await user.save();
+
+    await sendEmail({
+        to: email,
+        subject: "Your OTP Code - Sara7a App",
+        html: `<h2>Your OTP is: ${otp}</h2>
+               <p>This code expires in 10 minutes.</p>`
+    });
+
+    return { message: "OTP sent to your email" };
+};

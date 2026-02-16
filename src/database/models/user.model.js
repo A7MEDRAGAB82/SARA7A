@@ -48,6 +48,15 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(ProviderEnums),
       default: ProviderEnums.System,
     },
+    otp: {
+      type: String,
+    },
+    otpExpires: {
+      type: Date,
+    },
+    passwordChangedAt: {
+      type: Date,
+    }
   },
   {
     timestamps: true,
@@ -79,6 +88,8 @@ userSchema.pre("save", async function () {
     
     if (this.isModified("password")) {
         this.password = await generateHash(this.password);
+
+        this.passwordChangedAt = Date.now()
     }
 
     if (this.isModified("phone")) {
