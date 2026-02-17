@@ -5,11 +5,11 @@ import {
   UnauthorizedException,
 } from "../../common/utils/response/index.js";
 import { userModel } from "../../database/index.js";
-import { findOne, insertOne ,findById, findByIdAndDelete} from "../../database/index.js";
+import { findOne, insertOne ,findById, findByIdAndDelete , redisClient} from "../../database/index.js";
 import jwt from "jsonwebtoken"
 import { env } from "../../../config/index.js";
 import crypto from "crypto"
-import {sendEmail  , generateHash} from "../../common/index.js"
+import {sendEmail  , generateHash , compareHash} from "../../common/index.js"
 
 
 export const signUp = async (data) => {
@@ -106,11 +106,10 @@ export const forgotPassword = async (email) => {
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
-
-    user.otp = await generateHash(otp);
-    user.otpExpires = Date.now() + 10 * 60 * 1000; 
-
-    await user.save();
+    const hashedOtp = await generateHash(otp);
+    await redisClient.set(`otp:${email}`, hashedOtp, {
+    EX: 600 
+})
 
     await sendEmail({
         to: email,
@@ -120,4 +119,28 @@ export const forgotPassword = async (email) => {
     });
 
     return { message: "OTP sent to your email" };
+};
+
+export const resetPassword = async (email, otp, newPassword) => {
+    const user = await findOne({ model: userModel, filter: { email } });
+    if (!user) {
+        NotFoundException({ message: "User not found" });
+    }
+
+    if (user.otpExpires < Date.now()) {
+        UnauthorizedException({ message: "OTP has expired, please request a new one" });
+    }
+
+    const isOtpMatch = await compareHash(otp, user.otp);
+    if (!isOtpMatch) {
+        UnauthorizedException({ message: "Invalid OTP" });
+    }
+
+    user.password = newPassword;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    await user.save();
+
+    return { message: "Password has been reset successfully" };
 };
