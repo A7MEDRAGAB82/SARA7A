@@ -8,8 +8,8 @@ import { userModel } from "../../database/index.js";
 import { findOne, insertOne ,findById, findByIdAndDelete , redisClient} from "../../database/index.js";
 import jwt from "jsonwebtoken"
 import { env } from "../../../config/index.js";
-import crypto from "crypto"
 import {sendEmail  , generateHash , compareHash} from "../../common/index.js"
+import { generateAndSendOTP } from "../../common/utils/sendOTP.js";
 
 
 export const signUp = async (data) => {
@@ -102,21 +102,10 @@ export const updatePassword = async (id , oldPassword , newPassword) =>{
 export const forgotPassword = async (email) => {
     const user = await findOne({ model: userModel, filter: { email } });
     if (!user) {
-        NotFoundException({ message: "User not found with this email" });
+        NotFoundException({ message: "User not found" });
     }
 
-    const otp = crypto.randomInt(100000, 999999).toString();
-    const hashedOtp = await generateHash(otp);
-    await redisClient.set(`otp:${email}`, hashedOtp, {
-    EX: 600 
-})
-
-    await sendEmail({
-        to: email,
-        subject: "Your OTP Code - Sara7a App",
-        html: `<h2>Your OTP is: ${otp}</h2>
-               <p>This code expires in 10 minutes.</p>`
-    });
+    await generateAndSendOTP(email, "Reset your password - Sara7a App");
 
     return { message: "OTP sent to your email" };
 };
