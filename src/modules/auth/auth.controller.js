@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signUp  , login , getUserById , updateLoginData , deleteUser , updatePassword , forgotPassword} from "./auth.service.js";
+import { signUp  , login , getUserById , updateLoginData , deleteUser , updatePassword , forgotPassword, resetPassword} from "./auth.service.js";
 import { NotFoundException, SuccessResponse } from "../../common/utils/response/index.js";
 import { verifyToken , asyncWrapper} from "../../middlewares/index.js"
 
@@ -77,6 +77,18 @@ router.post("/forgot-password", asyncWrapper(async (req, res) => {
     });
 }));
 
+router.patch("/reset-password", asyncWrapper(async (req,res)=>{
+    const {email  , otp , newPassword} = req.body;
+    const result = await resetPassword(email , otp , newPassword)
+    
+    return SuccessResponse({
+      res,
+      message:result.message,
+      status:200
+    })
+
+
+}))
 
 
 
