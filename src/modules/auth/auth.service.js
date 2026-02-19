@@ -5,131 +5,137 @@ import {
   UnauthorizedException,
 } from "../../common/utils/response/index.js";
 import { userModel } from "../../database/index.js";
-import { findOne, insertOne ,findById, findByIdAndDelete , redisClient} from "../../database/index.js";
-import jwt from "jsonwebtoken"
+import {
+  findOne,
+  insertOne,
+  findById,
+  findByIdAndDelete,
+  redisClient,
+} from "../../database/index.js";
+import jwt from "jsonwebtoken";
 import { env } from "../../../config/index.js";
-import {sendEmail  , generateHash , compareHash} from "../../common/index.js"
-import { generateAndSendOTP } from "../../common/utils/sendOTP.js";
-
+import {
+  sendEmail,
+  generateHash,
+  compareHash,
+  validateExists,
+  generateAndSendOTP,
+} from "../../common/index.js";
 
 export const signUp = async (data) => {
-  let { userName, email, password  , phone ,gender , DOB } = data;
-  let existUser = await findOne({model:userModel ,filter:{email}})
+  let { userName, email, password, phone, gender, DOB } = data;
+  let existUser = await findOne({ model: userModel, filter: { email } });
   if (existUser) {
-     ConflictException({message:"email already exist"});
+    ConflictException({ message: "email already exist" });
   }
   let addedUser = await insertOne({
-      model: userModel,
-      data: { 
-          userName, 
-          email, 
-          password,
-          phone,
-          gender,
-          DOB, 
-          provider: ProviderEnums.System 
-      }
+    model: userModel,
+    data: {
+      userName,
+      email,
+      password,
+      phone,
+      gender,
+      DOB,
+      provider: ProviderEnums.System,
+    },
   });
   return addedUser;
 };
 
 export const login = async (data) => {
   let { email, password } = data;
-  let existUser = await findOne({model:userModel , filter:{email , provider:ProviderEnums.System}})
+  let existUser = await findOne({
+    model: userModel,
+    filter: { email, provider: ProviderEnums.System },
+  });
   if (existUser) {
-    const isMatched = await existUser.comparePassword(password)
-    if(isMatched){
-      let token = jwt.sign({id:existUser._id} , env.JWT_SECRET_KEY , {expiresIn:"1d"})
-      return {user:existUser,token}
+    const isMatched = await existUser.comparePassword(password);
+    if (isMatched) {
+      let token = jwt.sign({ id: existUser._id }, env.JWT_SECRET_KEY, {
+        expiresIn: "1d",
+      });
+      return { user: existUser, token };
     }
   }
-   NotFoundException({ message: "invalid email or password" });
+  NotFoundException({ message: "invalid email or password" });
 };
 
-export const getUserById = async (userId) =>{
- 
+export const getUserById = async (userId) => {
+  return await validateExists({
+    model: userModel,
+    filter: { _id: userId },
+    message: "user not found",
+  });
+};
 
-   const  userData = await findById({model:userModel , id:userId}) 
-   if(!userData){
-     NotFoundException({message:"user not found"})
-   }
-   return userData
-}
+export const updateLoginData = async (id, data) => {
+  let { userName, phone, gender, DOB } = data;
+  const existUser = await validateExists({
+    model: userModel,
+    filter: { _id: id },
+    message: "user not found",
+  });
 
-export const updateLoginData = async (id , data) =>{
-  let {userName , phone, gender, DOB} = data
-  const existUser = await findById({model:userModel , id})
-  if(!existUser){
-     NotFoundException({message:"user not found"})
+  Object.assign(existUser, data);
+
+  await existUser.save();
+
+  return existUser;
+};
+
+export const deleteUser = async (id) => {
+  const deletedUser = await findByIdAndDelete({ model: userModel, id });
+  if (!deletedUser) {
+    NotFoundException({ message: "user not found" });
   }
-   
-   
-if (userName) existUser.userName = userName;
-if (phone) existUser.phone = phone;
-if (gender) existUser.gender = gender;
-if (DOB) existUser.DOB = DOB;
+  return deletedUser;
+};
 
-  await existUser.save()
+export const updatePassword = async (id, oldPassword, newPassword) => {
+  const existUser = await validateExists({
+    model: userModel,
+    filter: { _id: id },
+    message: "user not found",
+  });
 
-
-return existUser
-  
-}
-
-export const deleteUser = async (id)=>{
-    const deletedUser = await findByIdAndDelete({model:userModel , id})
-    if(!deletedUser){
-      NotFoundException({message:"user not found"})
-    }
-    return deletedUser
-}
-
-export const updatePassword = async (id , oldPassword , newPassword) =>{
-  const existUser = await findById({model:userModel , id})
-  if(!existUser){
-      NotFoundException({message:"user not found"})
+  const isMatched = await existUser.comparePassword(oldPassword);
+  if (!isMatched) {
+    UnauthorizedException({ message: "old password is incorrect" });
   }
-
-  const isMatched = await existUser.comparePassword(oldPassword)
-  if(!isMatched){
-    UnauthorizedException({message:"old password is incorrect"})
-  }
-  existUser.password = newPassword
-  await existUser.save()
-  return existUser
-}
+  existUser.password = newPassword;
+  await existUser.save();
+  return existUser;
+};
 
 export const forgotPassword = async (email) => {
-    const user = await findOne({ model: userModel, filter: { email } });
-    if (!user) {
-        NotFoundException({ message: "User not found" });
-    }
-
-    await generateAndSendOTP(email, "Reset your password - Sara7a App");
-
-    return { message: "OTP sent to your email" };
+  const user = await validateExists({
+    model: userModel,
+    filter: { email: email },
+    message: "user not found",
+  });
+  await generateAndSendOTP(email, "Reset your password - Sara7a App");
+  return { message: "OTP sent to your email" };
 };
 
 export const resetPassword = async (email, otp, newPassword) => {
-    const user = await findOne({ model: userModel, filter: { email } });
-    if (!user) {
-        NotFoundException({ message: "User not found" });
-    }
+  const storedHashedOtp = await redisClient.get(`otp:${email}`);
+  if (!storedHashedOtp) {
+    UnauthorizedException({ message: "OTP has expired or not found" });
+  }
+  const isOtpMatch = await compareHash(otp, storedHashedOtp);
+  if (!isOtpMatch) {
+    UnauthorizedException({ message: "Invalid OTP" });
+  }
 
-    if (user.otpExpires < Date.now()) {
-        UnauthorizedException({ message: "OTP has expired, please request a new one" });
-    }
+  const user = await validateExists({
+    model: userModel,
+    filter: { email: email },
+    message: "user not found",
+  });
 
-    const isOtpMatch = await compareHash(otp, user.otp);
-    if (!isOtpMatch) {
-        UnauthorizedException({ message: "Invalid OTP" });
-    }
-
-    user.password = newPassword;
-    user.otp = undefined;
-    user.otpExpires = undefined;
-
-    await user.save();
-
-    return { message: "Password has been reset successfully" };
+  user.password = newPassword;
+  await user.save();
+  await redisClient.del(`otp:${email}`);
+  return { message: "Password has been reset successfully" };
 };
