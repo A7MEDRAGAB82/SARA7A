@@ -54,6 +54,7 @@ export const login = async (data) => {
     if (isMatched) {
       let token = jwt.sign({ id: existUser._id }, env.JWT_SECRET_KEY, {
         expiresIn: "1d",
+        issuer: "sara7a-app"
       });
       return { user: existUser, token };
     }
