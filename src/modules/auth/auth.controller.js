@@ -36,7 +36,7 @@ router.get("/get-user-by-id", verifyToken  ,allowedTo("Admin" , "User"), asyncWr
 })
 )
 
-router.patch("/update-login-data" , verifyToken , asyncWrapper(async (req ,res)=>{
+router.patch("/update-login-data" , verifyToken ,allowedTo("Admin" , "User") , asyncWrapper(async (req ,res)=>{
   let updateUser = await updateLoginData(req.user.id , req.body)
   return SuccessResponse({
     res,
@@ -45,7 +45,7 @@ router.patch("/update-login-data" , verifyToken , asyncWrapper(async (req ,res)=
   })
 }))
 
-router.delete("/delete-user", verifyToken , asyncWrapper(async (req,res)=>{
+router.delete("/delete-user", verifyToken ,allowedTo("Admin") , asyncWrapper(async (req,res)=>{
   let deletedUser = await deleteUser(req.user.id)
   return SuccessResponse({
     res,
@@ -53,7 +53,7 @@ router.delete("/delete-user", verifyToken , asyncWrapper(async (req,res)=>{
   })
 }))
 
-router.patch("/update-password" , verifyToken , asyncWrapper(async (req, res)=>{
+router.patch("/update-password" , verifyToken ,allowedTo("Admin" , "User")  , asyncWrapper(async (req, res)=>{
   let {oldPassword  , newPassword} = req.body
   let updatedUser = await updatePassword(req.user.id , oldPassword , newPassword)
   return SuccessResponse({
