@@ -11,6 +11,7 @@ const ENC_KEY = process.env.ENC_KEY || "defaultKey";
 const emailUser = process.env.EMAIL_USER
 const emailPassword = process.env.EMAIL_PASS
 
+
 export const env = {
   port,
   mongoURL,
@@ -19,5 +20,6 @@ export const env = {
   JWT_SECRET_KEY,
   ENC_KEY,
   emailUser,
-  emailPassword
+  emailPassword,
+  
 };

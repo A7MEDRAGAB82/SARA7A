@@ -1,3 +1,4 @@
+// src/middlewares/verifyToken.js
 import jwt from "jsonwebtoken";
 import { env } from "../../config/index.js";
 import { UnauthorizedException } from "../common/utils/response/index.js";
@@ -6,7 +7,7 @@ export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.token || req.headers.authorization;
 
   if (!authHeader) {
-    return UnauthorizedException({ message: "You are not authenticated!" });
+    return UnauthorizedException({ res, message: "Authentication required!" });
   }
 
   const token = authHeader.startsWith("Bearer ")
@@ -19,9 +20,8 @@ export const verifyToken = (req, res, next) => {
     });
 
     req.user = decoded;
-
     next();
   } catch (err) {
-    return UnauthorizedException({ message: "Token is not valid or expired!" });
+    return UnauthorizedException({ res, message: "Invalid or expired token!" });
   }
 };

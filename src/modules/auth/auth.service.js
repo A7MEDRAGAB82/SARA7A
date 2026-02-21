@@ -50,13 +50,20 @@ export const login = async (data) => {
     model: userModel,
     filter: { email, provider: ProviderEnums.System },
   });
-  if (existUser) {
-    const isMatched = await existUser.comparePassword(password);
-    if (isMatched) {
-      let token = generateToken({ payload: { id: existUser._id } });
-      return { user: existUser, token };
-    }
+  if (!existUser) {
+    NotFoundException({ message: "invalid email or password" });
   }
+
+  const isMatched = await existUser.comparePassword(password);
+  if (isMatched) {
+    let audience = existUser.role === "0" ? "Admin" : "User";
+    let token = generateToken({
+      payload: { id: existUser._id },
+      audience: audience,
+    });
+    return { user: existUser, token };
+  }
+
   NotFoundException({ message: "invalid email or password" });
 };
 

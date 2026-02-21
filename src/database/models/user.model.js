@@ -4,7 +4,8 @@ import {
   ProviderEnums,
   generateHash,
   compareHash,
-  encrypt
+  encrypt,
+  roleEnums
 } from "../../common/index.js";
 
 const userSchema = new mongoose.Schema(
@@ -47,6 +48,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(ProviderEnums),
       default: ProviderEnums.System,
+    },
+    role:{
+        type:String,
+        enum: Object.values(roleEnums),
+        default: roleEnums.User
     },
     passwordChangedAt: {
       type: Date,
