@@ -94,3 +94,35 @@ Flexibility: Supports routes that are accessible by multiple roles (e.g., allowe
 
 Consequences
 verifyToken must always be placed before allowedTo in the route chain.
+
+Decision 006: Secure Session Management with Refresh Token Rotation
+
+Context
+.We need a secure way to keep users logged in without making the Access Token long-lived, which would increase the risk of token theft
+
+Decision
+:We implemented a dual-token system with the following rules
+
+Refresh Token Type: A cryptographically secure random string (using crypto.randomBytes).
+
+Storage: Stored in Redis with a 30-day Time-To-Live (TTL).
+
+Rotation Policy: Every time a new Access Token is requested, the old Refresh Token is deleted and a new one is issued.
+
+Helper Strategy: Centralized session creation logic in a private createSession helper within the Auth Service.
+
+Reason
+
+Security (Replay Protection): Rotation ensures that if a Refresh Token is leaked, it can only be used once. Subsequent attempts with the same token will fail, signaling a potential breach.
+
+Control (Revocation): Using a random string in Redis allows us to instantly revoke a user's session (e.g., on Logout) by deleting the key.
+
+Performance: Redis handles session lookups and deletions in sub-millisecond time.
+
+Code Quality (DRY): The createSession helper ensures consistent token structure between Login and Refresh-token flows.
+
+Consequences
+
+Clients must store and send two different tokens.
+
+The system relies on Redis availability for all authentication renewals.
