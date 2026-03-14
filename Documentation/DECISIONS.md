@@ -22,6 +22,8 @@ Separation of Concerns: Controllers only handle requests, Services handle logic.
 Consequences
 Requires clear Export/Import management (using index.js barrels).
 
+======================================================================================
+
 Decision 002: Using Redis for OTP Storage
 
 Context
@@ -39,6 +41,8 @@ Security: OTPs are hashed before being stored in Redis.
 
 Consequences
 Adds Redis as a project dependency.
+
+===================================================================================================
 
 Decision 003: JWT with Registered Claims (iss & aud)
 
@@ -60,6 +64,8 @@ Role Isolation: The aud claim prevents "User" tokens from accessing "Admin" rout
 Consequences
 Verification middleware must explicitly check these claims.
 
+================================================================================================
+
 Decision 004: Standardized Response & Exception Handling
 
 Context
@@ -75,6 +81,8 @@ Maintainability: Changing an error message or status code happens in one place.
 
 Consequences
 All service logic must use these utility classes for throwing errors.
+
+=================================================================================================
 
 Decision 005: Role-Based Access Control (RBAC) Middleware
 Context
@@ -94,6 +102,8 @@ Flexibility: Supports routes that are accessible by multiple roles (e.g., allowe
 
 Consequences
 verifyToken must always be placed before allowedTo in the route chain.
+
+=====================================================================================================
 
 Decision 006: Secure Session Management with Refresh Token Rotation
 
@@ -127,6 +137,8 @@ Clients must store and send two different tokens.
 
 The system relies on Redis availability for all authentication renewals.
 
+====================================================================================================
+
 Decision 007: Centralized Request Validation using Joi
 
 Context
@@ -158,3 +170,37 @@ Consequences
 Every new endpoint must have an associated Joi schema.
 
 Changes to the database schema must be reflected in the corresponding Joi schemas
+
+===================================================================================================
+
+Decision 008: File Upload Strategy & Static Asset Serving
+
+Context
+The application requires users to upload profile pictures, and potentially other media in the future (like message attachments), which needs to be stored and accessed efficiently.
+
+Decision
+We implemented a local file-based storage strategy using Multer and Express Static Middleware:
+
+Storage: Files are stored on the server's disk in a structured directory (/upload/profileImages).
+
+Naming Convention: Files are prefixed with a timestamp to prevent name collisions.
+
+Access: The /upload directory is served as a Static Route using express.static.
+
+Database Mapping: Only the relative file path (String) is stored in the User Model, not the file itself.
+
+Reason
+
+Performance: Storing files in the database (BLOB) is inefficient and slows down queries. Disk storage is much faster for binary assets.
+
+Decoupling: Using Multer as a middleware ensures that file handling is separated from business logic.
+
+Simplicity: Serving via express.static is the most straightforward way to make files accessible to the frontend without complex stream handling.
+
+Consequences
+
+The server's disk space must be monitored.
+
+The upload/ folder must be excluded from Version Control (Git) to avoid repo bloating.
+
+Requires manual cleanup (deletion) of old files when a user updates or deletes their profile picture to prevent "Orphaned Files".
