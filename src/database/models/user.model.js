@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import {  Schema ,  model } from "mongoose";
+
 import {
   GenderEnums,
   ProviderEnums,
@@ -8,7 +9,7 @@ import {
   roleEnums
 } from "../../common/index.js";
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
   {
     firstName: {
       type: String,
@@ -60,11 +61,11 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    versionKey: false,
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
         delete ret.password;
-        delete ret.__v;
         return ret;
       },
     },
@@ -102,4 +103,4 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await compareHash(enteredPassword, this.password);
 };
 
-export const userModel = mongoose.model("User", userSchema);
+export const userModel = model("User", userSchema);
