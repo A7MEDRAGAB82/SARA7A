@@ -25,9 +25,14 @@ export const findAll = async ({
   if (select) {
     doc.select(select);
   }
+
+  const limit = options.limit || 10;
+  const page = options.page || 1;
+  const skip = options.skip || (page - 1) * limit;
+
+  query.skip(skip).limit(limit);
+
  if (options.populate) doc.populate(options.populate);
-  if (options.skip) doc.skip(options.skip);
-  if (options.limit) doc.limit(options.limit);
   if (options.sort) doc.sort(options.sort);
   if (options.lean) doc.lean();
   return await doc;

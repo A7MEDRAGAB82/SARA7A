@@ -3,6 +3,7 @@ import { env } from "../config/index.js"
 import { databaseConnection } from './database/index.js'
 import { globalErrorHandler } from './common/utils/response/index.js'
 import authRouter from "./modules/auth/auth.controller.js"
+import messageRouter from "./modules/messages/message.controller.js"
 import { connectRedis } from "./database/index.js"
 
 
@@ -14,6 +15,7 @@ export const bootStrap = async () => {
     await databaseConnection()
     await connectRedis()
     app.use('/auth', authRouter)
+    app.use('/message', messageRouter)
     app.use('{*dummy}', (req, res) => res.status(404).json('invalid route'))
     app.use(globalErrorHandler)
     app.listen(env.port, () => {

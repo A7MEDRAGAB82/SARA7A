@@ -1,6 +1,22 @@
 import { NotFoundException } from "../../common/utils/response/index.js";
 import { messageModel } from "../../database/models/message.model.js";
-import { findAll, findOne, findOneAndUpdate } from "../../database/index.js";
+import { findAll, findOne, findOneAndUpdate , insertOne} from "../../database/index.js";
+
+
+export const createMessage = async ({ content, receiverId, user })=> {
+     const senderId = user?.id || null
+
+     const newMessage = await insertOne({
+           model:messageModel,
+           data:{
+            content,
+            receiverId,
+            senderId
+           }
+     })
+
+     return newMessage
+}
 
 export const getUserMessages = async (userId , pagination) => {
   

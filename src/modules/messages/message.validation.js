@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const sendMessageSchema = Joi.object({
-  content: Joi.string().trim().min(1).max(1000).required().messages({
+  content: Joi.string().trim().min(1).max(5000).required().messages({
     "string.empty": "Message content cannot be empty",
     "string.max": "Message is too long (max 5000 characters)",
   }),
