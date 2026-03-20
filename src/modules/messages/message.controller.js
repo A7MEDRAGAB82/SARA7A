@@ -9,7 +9,9 @@ import {
   verifyToken,
   asyncWrapper,
   allowedTo,
+  validateRequest,
 } from "../../middlewares/index.js";
+import { paginationQuerySchema } from "./message.validation.js";
 
 const router = Router();
 
@@ -18,7 +20,7 @@ router.get(
   verifyToken,
   allowedTo("Admin", "User"),
   asyncWrapper(async (req, res) => {
-    const messages = await getUserMessages(req.user.id);
+    const messages = await getUserMessages(req.user.id , req.query);
     return SuccessResponse({
       res,
       message: "Messages fetched successfully",
@@ -31,6 +33,7 @@ router.get(
   "/get-message/:id",
   verifyToken,
   allowedTo("Admin", "User"),
+  validateRequest(paginationQuerySchema , 'query'),
   asyncWrapper(async (req, res) => {
     const message = await getMessageById(req.params.id, req.user.id);
     return SuccessResponse({
@@ -42,7 +45,7 @@ router.get(
 );
 
 router.delete(
-  "delete-message/:id",
+  "/delete-message/:id",
   verifyToken,
   allowedTo("Admin", "User"),
   asyncWrapper(async (req, res) => {

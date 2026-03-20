@@ -2,12 +2,13 @@ import { NotFoundException } from "../../common/utils/response/index.js";
 import { messageModel } from "../../database/models/message.model.js";
 import { findAll, findOne, findOneAndUpdate } from "../../database/index.js";
 
-export const getUserMessages = async (userId) => {
+export const getUserMessages = async (userId , pagination) => {
   
   const messages = await findAll({
     model: messageModel,
     filter: { receiverId: userId, isDeleted: false },
     options: {
+      ...pagination,
       populate: { path: "senderId", select: "userName profileImage" },
       lean:true
     },
