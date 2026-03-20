@@ -14,7 +14,8 @@ export const validateRequest = (schema , source = 'body') => {
       });
     }
 
-    req[source] = value;
+    if(source === 'body') req.body = value;
+    else Object.assign(req[source] , value)
     next();
   };
 };
