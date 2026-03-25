@@ -57,7 +57,14 @@ const userSchema = new Schema(
     },
     passwordChangedAt: {
       type: Date,
-    },
+    },shareProfileName: {
+      type: String,
+      required: [true,"Share profile name is required"],
+      unique: true,
+      lowercase:true,
+      trim:true,
+      minLength: [3, "Share profile name must be at least 3 characters"]
+    }
   },
   {
     timestamps: true,
