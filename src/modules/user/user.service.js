@@ -22,7 +22,6 @@ export const getUserProfile = async (userId) => {
   };
 };
 
-
 export const shareProfileLink = async (shareProfileName) => {
   const user = await findOne({
     model:userModel,
@@ -37,3 +36,22 @@ export const shareProfileLink = async (shareProfileName) => {
     return profileURL
   }
 }
+
+export const getUserData = async (fullLink) => {
+  if (!fullLink) throw new Error("Profile link is required");
+
+  const parts = fullLink.split("/").filter(Boolean);
+  const shareProfileName = parts[parts.length - 1]; 
+
+  const user = await findOne({
+    model: userModel,
+    filter: { shareProfileName: shareProfileName },
+    select: "firstName lastName profileImage bio -_id"
+  });
+
+  if (!user) {
+    throw NotFoundException({ message: `User with name "${shareProfileName}" not found` });
+  }
+
+  return user;
+};

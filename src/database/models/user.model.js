@@ -57,13 +57,19 @@ const userSchema = new Schema(
     },
     passwordChangedAt: {
       type: Date,
-    },shareProfileName: {
+    },
+    shareProfileName: {
       type: String,
       required: [true,"Share profile name is required"],
       unique: true,
       lowercase:true,
       trim:true,
       minLength: [3, "Share profile name must be at least 3 characters"]
+    },
+    bio: {
+      type: String,
+      maxLength: 30,
+      trim: true,
     }
   },
   {
@@ -72,7 +78,20 @@ const userSchema = new Schema(
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
+        delete ret._id; 
+        delete ret.id;
         delete ret.password;
+        delete ret.email;
+        delete ret.phone;
+        delete ret.role;
+        delete ret.provider;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+        delete ret.passwordChangedAt;
+        
+        delete ret.firstName;
+        delete ret.lastName;
+
         return ret;
       },
     },
