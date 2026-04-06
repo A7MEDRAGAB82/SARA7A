@@ -70,6 +70,10 @@ const userSchema = new Schema(
       type: String,
       maxLength: 30,
       trim: true,
+    },
+    profilePic: {
+      type: String,
+      trim: true,
     }
   },
   {
@@ -92,6 +96,12 @@ const userSchema = new Schema(
         delete ret.firstName;
         delete ret.lastName;
 
+        // Replace raw path with absolute URL
+        if (ret.profilePicUrl) {
+          ret.profilePic = ret.profilePicUrl;
+        }
+        delete ret.profilePicUrl;
+
         return ret;
       },
     },
@@ -110,6 +120,11 @@ userSchema
   .get(function () {
     return `${this.firstName} ${this.lastName}`;
   });
+
+userSchema.virtual("profilePicUrl").get(function () {
+  if (!this.profilePic) return null;
+  return `${process.env.BASE_URL}/${this.profilePic}`;
+});
 
 userSchema.pre("save", async function () {
     
