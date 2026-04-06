@@ -7,7 +7,7 @@ import {
   insertOne,
 } from "../../database/index.js";
 
-export const createMessage = async ({ content, receiverId, user }) => {
+export const createMessage = async ({ content, receiverId, attachment, user }) => {
   const senderId = user?.id || null;
 
   const newMessage = await insertOne({
@@ -16,6 +16,7 @@ export const createMessage = async ({ content, receiverId, user }) => {
       content,
       receiverId,
       senderId,
+      attachment: attachment || null,
     },
   });
 

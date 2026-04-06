@@ -1,6 +1,5 @@
 import multer from "multer";
 import fs from "node:fs";
-import { BadRequestException } from "../../common/index.js"; 
 
 export const multer_local = ({ customPath = "general", allowedTypes = ["image/jpeg", "image/png", "image/jpg"] } = {}) => {
   

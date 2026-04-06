@@ -11,31 +11,35 @@ import {
   asyncWrapper,
   allowedTo,
   validateRequest,
+  multer_local,
 } from "../../middlewares/index.js";
-import { messageIdSchema, paginationQuerySchema } from "./message.validation.js";
+import { sendMessageSchema, messageIdSchema, paginationQuerySchema } from "./message.validation.js";
 
 const router = Router();
 
 router.post(
   "/send-message",
+  multer_local({ customPath: "messages" }).single("messageImage"),
   verifyToken,
   allowedTo("User"),
-  asyncWrapper(async (req , res)=>{
-      const message = await createMessage({
-        ...req.body,
-        user: req.user
-      })    
+  validateRequest(sendMessageSchema, "body"),
+  asyncWrapper(async (req, res) => {
+    const attachment = req.file?.path || null;
 
-      return SuccessResponse({
-        res,
-        status:201,
-        message: "Message sent successfully",
-        data: message
-      })
+    const message = await createMessage({
+      ...req.body,
+      attachment,
+      user: req.user,
+    });
 
-
-  })
-)
+    return SuccessResponse({
+      res,
+      status: 201,
+      message: "Message sent successfully",
+      data: message,
+    });
+  }),
+);
 
 router.get(
   "/get-all-messages",

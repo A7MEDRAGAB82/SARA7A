@@ -12,7 +12,7 @@ import { connectRedis } from "./database/index.js"
 export const bootStrap = async () => {
     const app = express()
     app.use(express.json())
-    app.use("/upload", express.static("upload"))
+    app.use("/uploads", express.static("uploads"))
     await databaseConnection()
     await connectRedis()
     app.use('/auth', authRouter)
