@@ -1,5 +1,6 @@
 import express from 'express'
 import { env } from "../config/index.js"
+import cors from 'cors'
 import { databaseConnection } from './database/index.js'
 import { globalErrorHandler } from './common/utils/response/index.js'
 import authRouter from "./modules/auth/auth.controller.js"
@@ -12,6 +13,11 @@ import { connectRedis } from "./database/index.js"
 export const bootStrap = async () => {
     const app = express()
     app.use(express.json())
+    app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
     app.use("/uploads", express.static("uploads"))
     await databaseConnection()
     await connectRedis()
