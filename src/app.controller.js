@@ -7,12 +7,14 @@ import authRouter from "./modules/auth/auth.controller.js"
 import messageRouter from "./modules/messages/message.controller.js"
 import userRouter from "./modules/user/user.controller.js"
 import { connectRedis } from "./database/index.js"
+import helmet from 'helmet'
 
 
 
 export const bootStrap = async () => {
     const app = express()
     app.use(express.json())
+    app.use(helmet())
     app.use(cors({
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
