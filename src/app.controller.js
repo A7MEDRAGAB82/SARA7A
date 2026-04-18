@@ -1,17 +1,40 @@
 import express from 'express'
 import { env } from "../config/index.js"
+import cors from 'cors'
 import { databaseConnection } from './database/index.js'
 import { globalErrorHandler } from './common/utils/response/index.js'
 import authRouter from "./modules/auth/auth.controller.js"
 import messageRouter from "./modules/messages/message.controller.js"
 import userRouter from "./modules/user/user.controller.js"
 import { connectRedis } from "./database/index.js"
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
+import geoip from 'geoip-lite'
 
 
 
 export const bootStrap = async () => {
     const app = express()
     app.use(express.json())
+    app.use(helmet())
+    app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, 
+	limit: 100, 
+	message: 'Too many requests from this IP, please try again after 15 minutes',
+    standardHeaders: 'draft-7', 
+	legacyHeaders: false, 
+}));
+app.use((req, res, next) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const geo = geoip.lookup(ip);
+    req.clientGeo = geo || { country: 'Unknown', region: 'Unknown', city: 'Unknown' };
+    next();
+})
     app.use("/uploads", express.static("uploads"))
     await databaseConnection()
     await connectRedis()
